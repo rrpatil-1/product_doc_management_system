@@ -93,6 +93,7 @@ cd Doc_Management_System
 ```
 
 2. **Run with Docker Compose**:
+  -  It will  use the mongodb image
 
 ```bash
 docker compose up --build 
@@ -101,11 +102,31 @@ docker compose up --build
 ```bash
 docker compose up --build -d
 ```
+- Use Mongo cloud 
+[follow the tutorial](https://www.google.com/search?q=create+a+mongodb+atlas+account&oq=create+a+mongo+db+a&gs_lcrp=EgZjaHJvbWUqCQgBEAAYDRiABDIGCAAQRRg5MgkIARAAGA0YgAQyCAgCEAAYFhgeMggIAxAAGBYYHjIICAQQABgWGB4yCAgFEAAYFhgeMggIBhAAGBYYHjIGCAcQRRg80gEJMTAwMDFqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:bfe76795,vid:7a2Nns23d_s,st:0)
+1. [Signup on mongo DB atlas](https://www.mongodb.com/cloud/atlas/register)
+2. create project
+![alt text](image.png)
+3. click on Data explorer
+![alt text](image-1.png)
+click on connect
+![alt text](image-2.png)
+4. create database [document_management_system]
+4. create collection [documents]
+5. click on three dot :
+select connect via 
+6. then clcik on driver
+7. create database user and password
+8. add the details in .env file replace with your crediential
 
-3. **Access the application**:
-   - GUI: `http://localhost:8000`
-   - API docs: `http://localhost:8000/docs`
-   - ReDoc: `http://localhost:8000/redoc`
+```bash
+MONGODB_HOST=YOUR_HOST_NAME
+DATABASE_NAME=document_management_system
+COLLECTION_NAME=documents
+MONGO_INITDB_ROOT_USERNAME=USERNAME
+MONGO_INITDB_ROOT_PASSWORD=PASSWORD
+```
+
 
 🔹 Authentication
 🔐 Firebase Console
@@ -141,6 +162,11 @@ window.FIREBASE_CONFIG = {
 ```bash
 uv sync
 ```
+OR
+```bash
+pip install -r requirements.txt
+```
+
 
 2. **Configure MongoDB**:
 
@@ -154,29 +180,24 @@ MONGO_INITDB_ROOT_PASSWORD=secret123
 COLLECTION_NAME=products
 ```
 
-Start MongoDB locally (e.g., via Docker):
 
-```bash
-docker run -d \
-  -e MONGO_INITDB_ROOT_USERNAME=admin \
-  -e MONGO_INITDB_ROOT_PASSWORD=secret123 \
-  -p 27017:27017 \
-  mongo:latest
-```
 
-3. **Seed the database**:
-
-```bash
-uv run python seed_db.py
-```
-
-4. **Start the server**:
+3. **Start the server**:
 
 ```bash
 uv run uvicorn app.main:app --reload
 ```
+OR
+```bash
+docker build -t fastapi-app .
+
+docker run -d --name my-app --env-file .env -p 8000:8000 fastapi-app
+
+```
+use docker desktop to check logs and status of container
 
 Open `http://localhost:8000` in your browser.
+![alt text](image-3.png)
 
 ## API Endpoints
 
