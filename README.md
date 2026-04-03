@@ -109,15 +109,16 @@ docker compose up --build -d
 ![alt text](image.png)
 3. click on Data explorer
 ![alt text](image-1.png)
-click on connect
+
+4. click on connect
 ![alt text](image-2.png)
-4. create database [document_management_system]
-4. create collection [documents]
-5. click on three dot :
+5. create database [document_management_system]
+6. create collection [documents]
+7. click on three dot :
 select connect via 
-6. then clcik on driver
-7. create database user and password
-8. add the details in .env file replace with your crediential
+8. then click on driver
+9. create database user and password
+10. add the details in .env file replace with your crediential
 
 ```bash
 MONGODB_HOST=YOUR_HOST_NAME
@@ -171,7 +172,7 @@ pip install -r requirements.txt
 2. **Configure MongoDB**:
 
 Create `.env` file:
-
+this is sample file add your own credential
 ```env
 MONGODB_HOST=localhost:27017
 DATABASE_NAME=document_management_system
