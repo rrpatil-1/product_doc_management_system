@@ -6,7 +6,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+app/static/js/firebase-config.js
 # C extensions
 *.so
 

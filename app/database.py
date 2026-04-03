@@ -17,7 +17,7 @@ PASSWORD = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
 
 # Build MongoDB URL safely
 if USERNAME and PASSWORD:
-    MONGO_URL = f"mongodb://{USERNAME}:{PASSWORD}@{MONGODB_HOST}/{DATABASE_NAME}?authSource=admin"
+    MONGO_URL = f"mongodb+srv://{USERNAME}:{PASSWORD}@{MONGODB_HOST}/{DATABASE_NAME}"
 else:
     logger.warning("MongoDB running without authentication")
     MONGO_URL = f"mongodb://{MONGODB_HOST}/{DATABASE_NAME}"
@@ -31,4 +31,18 @@ client = AsyncIOMotorClient(MONGO_URL)
 database = client[DATABASE_NAME]
 collection = database[COLLECTION_NAME]
 
+
+async def connect_to_mongo():
+    try:
+        await client.admin.command("ping")
+        logger.info("✅ Successfully connected to MongoDB!")
+    except Exception as e:
+        logger.error(f"❌ MongoDB connection failed: {e}")
+        raise
+
+
+# ✅ Optional: clean shutdown
+async def close_mongo_connection():
+    client.close()
+    logger.info("MongoDB connection closed")
 

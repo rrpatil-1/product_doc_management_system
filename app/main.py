@@ -19,8 +19,29 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Product Management API", version="1.0.0")
 
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+
+app = FastAPI()
+
+# ✅ MUST BE FIRST
+@app.get("/__/auth/{path:path}")
+async def firebase_auth_handler():
+    return HTMLResponse("""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Auth</title></head>
+        <body>
+        <script>
+            // Let Firebase complete the login flow
+            window.opener && window.opener.postMessage(location.href, "*");
+            window.close();
+        </script>
+        </body>
+        </html>
+    """)
 # Mount static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="app/static",html=True), name="static")
 
 # Templates
 templates = Jinja2Templates(directory="app/templates")
