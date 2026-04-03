@@ -12,7 +12,7 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - ./app:/app/app
+      - ./app:app/app
     restart: unless-stopped
 
   mongodb:

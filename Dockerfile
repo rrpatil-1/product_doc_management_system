@@ -12,7 +12,7 @@ COPY requirements.txt ./
 # RUN uv sync --frozen --no-install-project
 RUN pip install --no-cache-dir -r requirements.txt
 # COPY .env ./
-COPY app /app
+COPY app /app/app
 
 EXPOSE 8000
 
