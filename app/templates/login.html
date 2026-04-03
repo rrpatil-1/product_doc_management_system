@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Product Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body style="background: #f0f2f5;">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-left">
+                <div class="brand">
+                    <h1>ProductDocMagmt</h1>
+                    <p>Manage inventory simply and quickly</p>
+                </div>
+            </div>
+            <div class="login-right info-box">
+                <h3 style="margin-top:0; text-align:center; color:#333;">Sign In</h3>
+                <p>Sign in with Google (Firebase) to access product Doc management.</p>
+                <div id="error-message" class="alert alert-error" style="display:none;"></div>
+                <div style="margin-top:1rem; text-align:center;">
+                    <button id="login-page-btn" class="btn btn-info btn-lg">Sign in with Google</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <script src="{{ url_for('static', path='js/firebase-config.js') }}"></script>
+    <script src="{{ url_for('static', path='js/app-auth.js') }}"></script>
+    <script>
+        (function() {
+            // Custom login page handler
+            const btn = document.getElementById('login-page-btn');
+            const errorDiv = document.getElementById('error-message');
+            if (btn) {
+                btn.addEventListener('click', async () => {
+                    try {
+                        errorDiv.style.display = 'none';
+                        btn.disabled = true;
+                        btn.textContent = 'Signing in...';
+                        await window.toggleAuth();
+                    } catch (err) {
+                        btn.disabled = false;
+                        btn.textContent = 'Sign in with Google';
+                        errorDiv.textContent = `Sign in failed: ${err.message || err.code || 'Unknown error'}`;
+                        errorDiv.style.display = 'block';
+                        console.error('Login error:', err);
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

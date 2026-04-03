@@ -1,0 +1,36 @@
+I want fastapi based rest api for managing product with simple GUI.
+api endpoint should be accessible over 
+example.com/api/v1/products
+
+TechStack: python v 3.12, fastapi(latest version), MongoDB
+We need to capture the following data in db
+unique identifier,name,category, description,thumbnailUrl, price,discount
+
+Features:
+1. create product
+2. list product
+3. get product by id
+4. update product
+5.  delete product
+
+Database Setup:
+database named: document_management_system
+collection named : documents
+
+
+User Interface:
+Create: Users can enter the details of a new document, including a unique identifier
+Read: Users can view a list of all documents stored in the collection, displaying the document's
+Update: Users can select a document and update its title, content, or any other fields. The updated document is saved back to the MongoDB collection.
+Delete: Users can choose a document to delete based on its unique identifier. The selected document is removed from the MongoDB collection.
+Query: Users can search for documents based on specific criteria, such as the document's title or any other field included. The matching documents are displayed on the user interface.
+
+Error Handling and Validation:
+Implement error handling mechanisms to handle exceptions and prevent potential errors during CRUD operations and querying.
+Validate user inputs to ensure data integrity and prevent the creation of duplicate documents or invalid queries.
+
+Use Docker images whenever possible.
+Always follow the right naming conventions and best practices for the code..
+You have to suggest the recommended project structure before generating code.
+Upon my confirmation you canstart to implement.
+I might have missed some points. Get them clarified before generating any code.

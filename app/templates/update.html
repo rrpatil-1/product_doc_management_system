@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Update Product{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Edit Product</h2>
+    <p class="subtitle">Update the product details below. Leave fields empty to keep existing values.</p>
+</div>
+
+<form id="update-form" class="product-form">
+    <input type="hidden" id="product_id" value="{{ product_id }}">
+
+    <div class="form-group">
+        <label for="name">Product Name:</label>
+        <input type="text" id="name" name="name" placeholder="Leave empty to keep current value">
+    </div>
+
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <input type="text" id="category" name="category" placeholder="Leave empty to keep current value">
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" placeholder="Leave empty to keep current value"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="thumbnail_url">Thumbnail URL:</label>
+        <input type="url" id="thumbnail_url" name="thumbnail_url" placeholder="Leave empty to keep current value">
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="price">Price ($):</label>
+            <input type="number" id="price" name="price" step="0.01" min="0.01" placeholder="Leave empty to keep current value">
+        </div>
+
+        <div class="form-group">
+            <label for="discount">Discount ($):</label>
+            <input type="number" id="discount" name="discount" step="0.01" min="0" placeholder="Leave empty to keep current value">
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">✓ Update Product</button>
+        <a href="/" class="btn btn-secondary btn-lg">Cancel</a>
+    </div>
+</form>
+
+<div id="message" class="message-container"></div>
+
+<script>
+    const productId = '{{ product_id }}';
+
+    // Load existing product data
+    document.addEventListener('DOMContentLoaded', loadProduct);
+
+    async function loadProduct() {
+        try {
+            const response = await fetch(`/api/v1/products/${productId}`, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error('Product not found');
+            const product = await response.json();
+            document.getElementById('name').value = product.name;
+            document.getElementById('category').value = product.category;
+            document.getElementById('description').value = product.description;
+            document.getElementById('thumbnail_url').value = product.thumbnail_url;
+            document.getElementById('price').value = product.price;
+            document.getElementById('discount').value = product.discount;
+        } catch (error) {
+            document.getElementById('message').innerHTML = '<div class="alert alert-error"><strong>✗ Error:</strong> ' + error.message + '</div>';
+        }
+    }
+
+    document.getElementById('update-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const product = Object.fromEntries(formData);
+        delete product.product_id; // Remove hidden field
+        // Convert to numbers if provided
+        if (product.price) product.price = parseFloat(product.price);
+        if (product.discount) product.discount = parseFloat(product.discount);
+
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            const response = await fetch(`/api/v1/products/${productId}`, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify(product)
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to update product');
+            }
+            document.getElementById('message').innerHTML = '<div class="alert alert-success"><strong>✓ Success!</strong> Product updated successfully!</div>';
+            setTimeout(() => { window.location.href = '/'; }, 2000);
+        } catch (error) {
+            document.getElementById('message').innerHTML = '<div class="alert alert-error"><strong>✗ Error:</strong> ' + error.message + '</div>';
+        }
+    });
+</script>
+{% endblock %}

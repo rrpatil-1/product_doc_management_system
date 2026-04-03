@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ProductDoc Management{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Product Doc Management System</h1>
+        <nav data-protected>
+            <a href="/">Home</a>
+            <a href="/create">Create Product</a>
+            <a href="/search">Search Products</a>
+        </nav>
+        <div class="auth-area">
+            <button id="auth-btn" class="btn btn-sm">Sign in</button>
+            <a id="login-link" href="/login" style="margin-left:0.5rem;">Login page</a>
+            <span id="user-info" class="user-info"></span>
+        </div>
+    </header>
+    <main>
+        <div data-protected>
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <script src="{{ url_for('static', path='js/firebase-config.js') }}"></script>
+    <script src="{{ url_for('static', path='js/app-auth.js') }}"></script>
+    <script src="{{ url_for('static', path='js/app.js') }}"></script>
+</body>
+</html>

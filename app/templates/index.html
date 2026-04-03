@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Product Inventory</h2>
+    <div class="header-actions">
+        <button id="read-btn" class="btn btn-info btn-lg" data-protected style="display:none">📖 Load Products</button>
+        <a href="/create" class="btn btn-primary btn-lg" data-protected style="display:none">+ Add New Product</a>
+    </div>
+</div>
+
+<div id="products-list" class="products-container">
+    <div class="info-box">
+        <p>Click the <strong>Load Products</strong> button above to view the product inventory.</p>
+    </div>
+</div>
+
+<script>
+    let currentSkip = 0;
+    const limit = 4;
+    let totalProducts = 0;
+    let currentSortField = 'name';
+    let currentSortOrder = 'asc';
+
+    // Wait for page load to attach click listeners
+    document.addEventListener('DOMContentLoaded', () => {
+        const readBtn = document.getElementById('read-btn');
+        if (readBtn) readBtn.addEventListener('click', loadProducts);
+        // Prev/Next buttons are created dynamically when products are displayed
+    });
+
+    async function loadProducts() {
+        currentSkip = 0; // Reset to first page when loading
+        await fetchProducts();
+    }
+
+    function onSortChange() {
+        currentSortField = document.getElementById('sort-field').value;
+        currentSortOrder = document.getElementById('sort-order').value;
+        currentSkip = 0; // Reset to first page when sorting changes
+        fetchProducts();
+    }
+
+    async function fetchProducts() {
+        const url = `/api/v1/products/?skip=${currentSkip}&limit=${limit}&sort_field=${currentSortField}&sort_order=${currentSortOrder}`;
+        try {
+            const headers = { 'Accept': 'application/json' };
+            // Add Firebase ID token if available
+            if (window.getIdToken) {
+                const idToken = await window.getIdToken();
+                if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+            }
+            const response = await fetch(url, { headers });
+            if (!response.ok) throw new Error('Failed to load products');
+            const data = await response.json();
+            totalProducts = data.total;
+            displayProducts(data.products);
+            updatePagination();
+        } catch (error) {
+            document.getElementById('products-list').innerHTML = `<div class="alert alert-error">Error loading products: ${error.message}</div>`;
+        }
+    }
+
+    function displayProducts(products) {
+        if (products.length === 0) {
+            document.getElementById('products-list').innerHTML = '<div class="alert alert-info">No products found. Click "Add New Product" to get started.</div>';
+            return;
+        }
+        
+        let html = '<table class="products-table">';
+        html += '<thead><tr>';
+        html += `<th class="sortable-header">
+            <span>Name</span>
+            <div class="sort-buttons">
+                <button class="sort-btn sort-asc" data-field="name" data-order="asc" title="Sort ascending">↑</button>
+                <button class="sort-btn sort-desc" data-field="name" data-order="desc" title="Sort descending">↓</button>
+            </div>
+        </th>`;
+        html += `<th class="sortable-header">
+            <span>Category</span>
+            <div class="sort-buttons">
+                <button class="sort-btn sort-asc" data-field="category" data-order="asc" title="Sort ascending">↑</button>
+                <button class="sort-btn sort-desc" data-field="category" data-order="desc" title="Sort descending">↓</button>
+            </div>
+        </th>`;
+        html += `<th class="sortable-header">
+            <span>Description</span>
+            <div class="sort-buttons">
+                <button class="sort-btn sort-asc" data-field="description" data-order="asc" title="Sort ascending">↑</button>
+                <button class="sort-btn sort-desc" data-field="description" data-order="desc" title="Sort descending">↓</button>
+            </div>
+        </th>`;
+        html += `<th class="sortable-header">
+            <span>Price</span>
+            <div class="sort-buttons">
+                <button class="sort-btn sort-asc" data-field="price" data-order="asc" title="Sort ascending">↑</button>
+                <button class="sort-btn sort-desc" data-field="price" data-order="desc" title="Sort descending">↓</button>
+            </div>
+        </th>`;
+        html += `<th class="sortable-header">
+            <span>Discount</span>
+            <div class="sort-buttons">
+                <button class="sort-btn sort-asc" data-field="discount" data-order="asc" title="Sort ascending">↑</button>
+                <button class="sort-btn sort-desc" data-field="discount" data-order="desc" title="Sort descending">↓</button>
+            </div>
+        </th>`;
+        html += '<th class="actions-col">Actions</th>';
+        html += '</tr></thead><tbody>';
+        
+        products.forEach(product => {
+            html += `<tr>
+                <td><strong>${product.name}</strong></td>
+                <td><span class="badge">${product.category}</span></td>
+                <td>${product.description}</td>
+                <td class="price">$${product.price.toFixed(2)}</td>
+                <td>${product.discount > 0 ? '$' + product.discount.toFixed(2) : '-'}</td>
+                <td class="actions">
+                    <a href="/update/${product.id}" class="btn btn-sm btn-info" title="Edit product">✏️ Edit</a>
+                    <button onclick="deleteProduct('${product.id}', '${product.name}')" class="btn btn-sm btn-danger" title="Delete product">🗑️ Delete</button>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        html += '<div class="pagination-controls">';
+        html += '<button id="prev-btn" class="btn btn-secondary" disabled>Previous</button>';
+        html += '<span id="page-info">Page 1</span>';
+        html += '<button id="next-btn" class="btn btn-secondary">Next</button>';
+        html += '</div>';
+        document.getElementById('products-list').innerHTML = html;
+        
+        // Attach click listeners to sort buttons
+        document.querySelectorAll('.sort-btn').forEach(button => {
+            button.addEventListener('click', () => onSortButtonClick(button.dataset.field, button.dataset.order));
+        });
+        
+        // Re-attach pagination event listeners since buttons are recreated
+        document.getElementById('prev-btn').addEventListener('click', () => changePage(-1));
+        document.getElementById('next-btn').addEventListener('click', () => changePage(1));
+    }
+
+    function onSortButtonClick(field, order) {
+        currentSortField = field;
+        currentSortOrder = order;
+        currentSkip = 0; // Reset to first page
+        fetchProducts();
+    }
+
+    function updatePagination() {
+        const currentPage = Math.floor(currentSkip / limit) + 1;
+        const totalPages = Math.ceil(totalProducts / limit);
+        
+        document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('prev-btn').disabled = currentPage === 1;
+        document.getElementById('next-btn').disabled = currentPage === totalPages || totalProducts === 0;
+        
+        // Show pagination controls only when products are loaded
+        const paginationControls = document.querySelector('.pagination-controls');
+        if (totalProducts > 0) {
+            paginationControls.style.display = 'flex';
+        } else {
+            paginationControls.style.display = 'none';
+        }
+    }
+
+    function changePage(direction) {
+        currentSkip += direction * limit;
+        if (currentSkip < 0) currentSkip = 0;
+        fetchProducts();
+    }
+
+    async function deleteProduct(id, name) {
+        if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+        try {
+            const response = await fetch(`/api/v1/products/${id}`, { method: 'DELETE' });
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Failed to delete product');
+            }
+            alert('Product deleted successfully');
+            fetchProducts(); // Reload current page
+        } catch (error) {
+            alert('Error deleting product: ' + error.message);
+        }
+    }
+</script>
+{% endblock %}

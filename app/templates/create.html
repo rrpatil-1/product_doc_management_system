@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Create Product{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Create New Product</h2>
+    <p class="subtitle">Fill in the details below to add a new product to the inventory</p>
+</div>
+
+<form id="create-form" class="product-form" data-protected>
+    <div class="form-group">
+        <label for="id">ID (Optional - Auto-generated if not provided):</label>
+        <input type="text" id="id" name="id" placeholder="Leave blank for auto-generated ID">
+    </div>
+
+    <div class="form-group">
+        <label for="name">Product Name: </span></label>
+        <input type="text" id="name" name="name" required placeholder="e.g., Laptop Pro 15">
+    </div>
+
+    <div class="form-group">
+        <label for="category">Category: <span class="required">*</span></label>
+        <input type="text" id="category" name="category" required placeholder="e.g., Electronics">
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description: <span class="required">*</span></label>
+        <textarea id="description" name="description" required placeholder="Provide a detailed description of the product"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="thumbnail_url">Thumbnail URL:</label>
+        <input type="url" id="thumbnail_url" name="thumbnail_url"  placeholder="https://example.com/image.jpg">
+    </div>
+
+    <div class="form-row">
+        <div class="form-group">
+            <label for="price">Price ($): <span class="required">*</span></label>
+            <input type="number" id="price" name="price" step="0.01" min="0.01" required placeholder="e.g., 29.99">
+        </div>
+
+        <div class="form-group">
+            <label for="discount">Discount ($):</label>
+            <input type="number" id="discount" name="discount" step="0.01" min="0" value="0" placeholder="e.g., 5.00">
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">✓ Create Product</button>
+        <a href="/" class="btn btn-secondary btn-lg">Cancel</a>
+    </div>
+</form>
+
+<div id="message" class="message-container"></div>
+
+<script>
+    document.getElementById('create-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const product = Object.fromEntries(formData);
+        // Convert price and discount to numbers
+        product.price = parseFloat(product.price);
+        product.discount = parseFloat(product.discount);
+
+        try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (window.getIdToken) {
+                    const idToken = await window.getIdToken();
+                    if (idToken) headers['Authorization'] = `Bearer ${idToken}`;
+                }
+                const response = await fetch('/api/v1/products', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(product)
+                });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to create product');
+            }
+            const createdProduct = await response.json();
+            document.getElementById('message').innerHTML = '<div class=\"alert alert-success\"><strong>✓ Success!</strong> Product created successfully! ID: ' + createdProduct.id + '</div>';
+            e.target.reset();
+            setTimeout(() => { window.location.href = '/'; }, 2000);
+        } catch (error) {
+            document.getElementById('message').innerHTML = '<div class=\"alert alert-error\"><strong>✗ Error:</strong> ' + error.message + '</div>';
+        }
+    });
+</script>
+{% endblock %}

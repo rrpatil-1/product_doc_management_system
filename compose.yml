@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # MONGODB_URL: ${MONGODB_URL}
+      MONGODB_HOST: ${MONGODB_HOST}
+      DATABASE_NAME: ${DATABASE_NAME}
+      COLLECTION_NAME: ${COLLECTION_NAME}
+
+    depends_on:
+      - mongodb
+    volumes:
+      - ./app:/app/app
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
